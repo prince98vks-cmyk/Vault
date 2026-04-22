@@ -2,7 +2,7 @@
   "name": "Vault Finance",
   "short_name": "Vault",
   "description": "Personal budget, investment tracker & spending insights",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#07070a",
   "theme_color": "#10b981",
