@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Vault">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#07070a">
+<title>Vault — Finance</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{
+  --bg:#07070a;--s1:#0d0d11;--s2:#13131a;--s3:#1a1a23;--s4:#22222d;
+  --border:#252530;--border2:#32323f;
+  --text:#f0eee9;--muted:#686770;--dim:#3f3e48;
+  --green:#10b981;--gdark:#059669;--gbg:rgba(16,185,129,0.09);--gb:rgba(16,185,129,0.25);
+  --amber:#f59e0b;--abg:rgba(245,158,11,0.09);--ab:rgba(245,158,11,0.25);
+  --red:#ef4444;--rbg:rgba(239,68,68,0.09);--rb:rgba(239,68,68,0.25);
+  --blue:#6366f1;--bbg:rgba(99,102,241,0.09);--bb:rgba(99,102,241,0.25);
+  --purple:#8b5cf6;--pbg:rgba(139,92,246,0.09);--pb:rgba(139,92,246,0.25);
+  --teal:#06b6d4;
+  --accent:#10b981;
+  --r:12px;--rl:16px;--rxl:20px;
+  --nav-h:64px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;overflow:hidden;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:15px;line-height:1.5;
+  height:100%;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+#root{height:100%;display:flex;flex-direction:column;}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input,select,button,textarea{font-family:'Outfit',sans-serif;font-size:15px;}
+::-webkit-scrollbar{display:none;}
+* {scrollbar-width:none;}
+
+/* ── INSTALL BANNER ── */
+.install-banner{
+  position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 12px);left:12px;right:12px;
+  background:var(--s1);border:1px solid var(--gb);border-radius:var(--rl);
+  padding:12px 14px;display:flex;align-items:center;gap:12px;z-index:200;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
+.ib-icon{font-size:28px;flex-shrink:0;}
+.ib-text{flex:1;}
+.ib-title{font-size:13px;font-weight:600;color:var(--green);margin-bottom:1px;}
+.ib-sub{font-size:11px;color:var(--muted);}
+.ib-btn{background:var(--green);border:none;border-radius:8px;color:#000;font-size:12px;font-weight:600;padding:8px 12px;cursor:pointer;flex-shrink:0;}
+.ib-close{background:transparent;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:4px;flex-shrink:0;}
+
+/* ── AUTH ── */
+.auth-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:calc(var(--safe-t) + 40px) 20px 40px;}
+.auth-logo{font-family:'Syne',sans-serif;font-size:2rem;font-weight:700;letter-spacing:-0.04em;text-align:center;margin-bottom:6px;}
+.auth-logo .dot{color:var(--accent);}
+.auth-tag{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-align:center;margin-bottom:32px;}
+.auth-card{width:100%;max-width:400px;background:var(--s1);border:1px solid var(--border);border-radius:var(--rxl);padding:24px 20px;}
+.fl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.09em;font-family:'JetBrains Mono',monospace;margin-bottom:6px;display:block;}
+.fi{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:15px;padding:13px 14px;margin-bottom:14px;transition:border 0.15s;appearance:none;}
+.fi:focus{outline:none;border-color:var(--accent);}
+.pbtn{width:100%;background:var(--accent);border:none;border-radius:var(--r);color:#000;font-size:15px;font-weight:600;padding:14px;cursor:pointer;transition:all 0.15s;letter-spacing:0.01em;}
+.pbtn:active{transform:scale(0.98);}
+.gbtn{width:100%;background:transparent;border:1px solid var(--border2);border-radius:var(--r);color:var(--muted);font-size:14px;padding:12px;cursor:pointer;transition:all 0.15s;margin-top:10px;}
+.gbtn:active{background:var(--s2);}
+.err{background:var(--rbg);border:1px solid var(--rb);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--red);margin-bottom:14px;}
+.pgrid{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.pcard{background:var(--s2);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all 0.15s;-webkit-tap-highlight-color:transparent;}
+.pcard:active{background:var(--s3);transform:scale(0.98);}
+.pav{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
+.or-d{display:flex;align-items:center;gap:10px;color:var(--dim);font-size:12px;margin:18px 0;}
+.or-d::before,.or-d::after{content:'';flex:1;height:1px;background:var(--border);}
+.lnk{color:var(--accent);cursor:pointer;font-size:13px;text-align:center;margin-top:16px;display:block;padding:8px;}
+
+/* ── APP SHELL ── */
+.app-shell{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.top-bar{
+  padding:calc(var(--safe-t) + 10px) 16px 10px;
+  background:var(--s1);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.tb-logo{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;letter-spacing:-0.02em;}
+.tb-logo .dot{color:var(--accent);}
+.tb-user{flex:1;display:flex;align-items:center;gap:8px;}
+.tb-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.tb-name{font-size:13px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tb-save{font-size:10px;color:var(--amber);font-family:'JetBrains Mono',monospace;}
+.tb-out{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;padding:6px 10px;cursor:pointer;}
+
+/* ── SCROLL AREA ── */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 16px);}
+.page-content{padding:16px;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  height:calc(var(--nav-h) + var(--safe-b));
+  padding-bottom:var(--safe-b);
+  background:var(--s1);border-top:1px solid var(--border);
+  display:flex;align-items:flex-start;flex-shrink:0;
+  position:relative;z-index:100;
+}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 6px;cursor:pointer;transition:all 0.12s;border:none;background:transparent;color:var(--dim);-webkit-tap-highlight-color:transparent;height:var(--nav-h);}
+.bn-item.active{color:var(--accent);}
+.bn-item:active{transform:scale(0.9);}
+.bn-icon{font-size:22px;margin-bottom:3px;transition:transform 0.12s;}
+.bn-item.active .bn-icon{transform:scale(1.15);}
+.bn-label{font-size:10px;font-weight:500;letter-spacing:0.01em;}
+.bn-badge{position:absolute;top:8px;right:calc(50% - 18px);background:var(--accent);color:#000;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{margin-bottom:16px;}
+.sec-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:600;letter-spacing:-0.02em;margin-bottom:2px;}
+.sec-sub{font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rxl);padding:16px;margin-bottom:14px;}
+.card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-ttl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.09em;font-family:'JetBrains Mono',monospace;}
+
+/* ── METRICS ── */
+.met-row{display:grid;gap:10px;margin-bottom:14px;}
+.m2{grid-template-columns:1fr 1fr;}
+.m3{grid-template-columns:repeat(3,1fr);}
+.met{background:var(--s1);border:1px solid var(--border);border-radius:var(--rl);padding:14px;}
+.ml{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;font-family:'JetBrains Mono',monospace;margin-bottom:5px;}
+.mv{font-size:1.15rem;font-family:'JetBrains Mono',monospace;font-weight:500;}
+.ms{font-size:10px;color:var(--dim);margin-top:2px;}
+.g{color:var(--green);}.a{color:var(--amber);}.r{color:var(--red);}.b{color:var(--blue);}.p{color:var(--purple);}.t{color:var(--teal);}
+
+/* ── BUTTONS ── */
+.btn{font-size:13px;padding:9px 16px;border-radius:10px;border:1px solid var(--border2);background:var(--s2);color:var(--text);cursor:pointer;transition:all 0.12s;display:inline-flex;align-items:center;gap:6px;}
+.btn:active{transform:scale(0.97);}
+.btn-g{background:var(--gbg);border-color:var(--gb);color:var(--green);}
+.btn-g:active{background:var(--green);color:#000;}
+.btn-a{background:var(--abg);border-color:var(--ab);color:var(--amber);}
+.btn-full{width:100%;justify-content:center;padding:14px;}
+.btn-d{background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:18px;padding:6px 10px;border-radius:8px;}
+.btn-d:active{color:var(--red);background:var(--rbg);}
+
+/* ── FORM FIELDS ── */
+.field{margin-bottom:14px;}
+.field-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;font-family:'JetBrains Mono',monospace;margin-bottom:6px;display:block;}
+.field-inp{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:15px;padding:12px 14px;transition:border 0.15s;appearance:none;}
+.field-inp:focus{outline:none;border-color:var(--accent);}
+.field-inp.right{text-align:right;font-family:'JetBrains Mono',monospace;}
+.field-sel{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-size:14px;padding:12px 14px;appearance:none;-webkit-appearance:none;}
+.field-sel:focus{outline:none;border-color:var(--accent);}
+
+/* ── EXPENSE LIST ── */
+.exp-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);}
+.exp-item:last-child{border-bottom:none;}
+.exp-ico{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.exp-body{flex:1;min-width:0;}
+.exp-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exp-cat{font-size:11px;color:var(--muted);}
+.exp-amt{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;flex-shrink:0;}
+.inline-inp{background:transparent;border:none;color:var(--text);font-size:14px;font-weight:500;width:100%;padding:0;}
+.inline-inp:focus{outline:none;}
+.inline-amt{background:transparent;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;text-align:right;width:80px;padding:0;}
+.inline-amt:focus{outline:none;}
+
+/* ── PROGRESS ── */
+.prog{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:6px 0;}
+.pf{height:6px;border-radius:3px;transition:width 0.4s;}
+
+/* ── TRANSACTION ITEMS ── */
+.txn-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--border);}
+.txn-item:last-child{border-bottom:none;}
+.txn-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.txn-body{flex:1;min-width:0;}
+.txn-name{font-size:14px;font-weight:500;}
+.txn-meta{font-size:11px;color:var(--muted);}
+.txn-amt{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--red);flex-shrink:0;}
+
+/* ── QUICK ADD MERCHANTS ── */
+.qa-scroll{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px;margin:0 -16px;padding-left:16px;padding-right:16px;}
+.qa-chip{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;padding:10px 12px;background:var(--s2);border:1.5px solid var(--border);border-radius:14px;min-width:62px;transition:all 0.12s;}
+.qa-chip:active,.qa-chip.sel{border-color:var(--accent);background:var(--gbg);}
+.qa-chip-icon{font-size:22px;}
+.qa-chip-name{font-size:10px;color:var(--muted);white-space:nowrap;}
+.qa-chip.sel .qa-chip-name{color:var(--green);}
+
+/* ── SMS TEXTAREA ── */
+.sms-ta{width:100%;min-height:140px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:12px;line-height:1.6;}
+.sms-ta:focus{outline:none;border-color:var(--accent);}
+
+/* ── PARSED TRANSACTION ── */
+.ptxn{display:flex;align-items:center;gap:10px;padding:12px;background:var(--s2);border-radius:var(--rl);margin-bottom:8px;border:1px solid var(--border);}
+.ptxn-check{width:22px;height:22px;accent-color:var(--green);flex-shrink:0;cursor:pointer;}
+.ptxn-ico{font-size:20px;flex-shrink:0;}
+.ptxn-body{flex:1;min-width:0;}
+.ptxn-name{font-size:13px;font-weight:500;}
+.ptxn-amt{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--red);font-weight:600;flex-shrink:0;}
+.cat-pill-sel{background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;padding:4px 8px;appearance:none;-webkit-appearance:none;}
+
+/* ── GOAL CARD ── */
+.goal-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--rxl);padding:16px;margin-bottom:12px;}
+.goal-emoji{font-size:28px;margin-bottom:8px;display:block;}
+.goal-name{font-size:16px;font-weight:600;margin-bottom:2px;}
+.goal-note{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.goal-bar-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.goal-bar-track{flex:1;height:10px;background:var(--border);border-radius:5px;overflow:hidden;}
+.goal-bar-fill{height:10px;border-radius:5px;transition:width 0.4s;}
+.goal-pct{font-size:12px;font-family:'JetBrains Mono',monospace;min-width:36px;text-align:right;}
+.goal-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:12px;}
+.goal-add-row{display:flex;gap:8px;align-items:center;}
+.goal-add-inp{flex:1;background:var(--s3);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;padding:10px 12px;text-align:right;}
+.goal-add-inp:focus{outline:none;border-color:var(--green);}
+
+/* ── INV CARD ── */
+.inv-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--rxl);padding:16px;margin-bottom:12px;}
+.inv-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.inv-dot{width:12px;height:12px;border-radius:4px;flex-shrink:0;}
+.inv-name{font-size:15px;font-weight:600;flex:1;}
+.inv-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.inv-stat{background:var(--s1);border-radius:10px;padding:10px 12px;}
+.inv-stat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em;font-family:'JetBrains Mono',monospace;margin-bottom:3px;}
+.inv-stat-v{font-size:1rem;font-family:'JetBrains Mono',monospace;font-weight:500;}
+.inv-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.inv-field{display:flex;flex-direction:column;gap:4px;}
+.inv-field-lbl{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.07em;font-family:'JetBrains Mono',monospace;}
+.inv-field-inp{background:var(--s3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;padding:8px 10px;width:100%;text-align:right;}
+.inv-field-inp:focus{outline:none;border-color:var(--accent);}
+.mode-row{display:flex;gap:6px;margin:12px 0;}
+.mode-btn{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:13px;transition:all 0.12s;}
+.mode-btn.on{background:var(--s3);border-color:var(--border2);color:var(--text);}
+
+/* ── TRACKER TABLE ── */
+.tracker-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--rxl);padding:16px;margin-bottom:14px;}
+.tracker-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);}
+.tracker-row:last-child{border-bottom:none;}
+.tracker-mo{font-size:13px;font-weight:500;min-width:50px;}
+.tracker-proj{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;min-width:60px;text-align:right;}
+.tracker-inputs{display:flex;gap:6px;flex:1;justify-content:flex-end;}
+.tracker-inp{width:68px;background:var(--s3);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 7px;text-align:right;}
+.tracker-inp:focus{outline:none;border-color:var(--accent);}
+.tracker-inp.filled{border-color:var(--gb);background:var(--gbg);color:var(--green);}
+.tracker-status{font-size:10px;padding:2px 7px;border-radius:5px;font-family:'JetBrains Mono',monospace;white-space:nowrap;border:1px solid;}
+.st-ok{background:var(--gbg);color:var(--green);border-color:var(--gb);}
+.st-pend{background:var(--abg);color:var(--amber);border-color:var(--ab);}
+.st-fut{background:var(--s3);color:var(--dim);border-color:var(--border);}
+
+/* ── SPEND BAR ── */
+.spend-bar{display:flex;height:32px;border-radius:8px;overflow:hidden;gap:2px;margin-bottom:12px;}
+.spend-seg{display:flex;align-items:center;justify-content:center;font-size:10px;color:#000;font-weight:600;transition:width 0.4s;min-width:4px;overflow:hidden;}
+.spend-legend{display:flex;flex-wrap:wrap;gap:8px;}
+.sl-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
+.sl-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+
+/* ── SETTINGS ── */
+.settings-group{background:var(--s1);border:1px solid var(--border);border-radius:var(--rxl);margin-bottom:14px;overflow:hidden;}
+.settings-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-label{flex:1;font-size:14px;}
+.settings-sub{font-size:11px;color:var(--muted);}
+.settings-inp{background:transparent;border:none;color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;text-align:right;width:110px;}
+.settings-inp:focus{outline:none;}
+
+/* ── NOTICES ── */
+.notice{background:var(--s2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:14px;border-left:3px solid var(--accent);}
+.sug{padding:12px 14px;border-radius:var(--rl);font-size:13px;line-height:1.65;margin-bottom:10px;}
+.sug.good{background:var(--gbg);border:1px solid var(--gb);color:#6ee7b7;}
+.sug.warn{background:var(--abg);border:1px solid var(--ab);color:#fcd34d;}
+.sug.alert{background:var(--rbg);border:1px solid var(--rb);color:#fca5a5;}
+.sug.info{background:var(--bbg);border:1px solid var(--bb);color:#a5b4fc;}
+.sug.tip{background:var(--pbg);border:1px solid var(--pb);color:#c4b5fd;}
+.chart-w{position:relative;height:200px;margin:10px 0;}
+.empty-state{text-align:center;padding:40px 20px;color:var(--dim);}
+.empty-state .big{font-size:3rem;margin-bottom:10px;}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+
+/* ── SHEET (modal bottom sheet) ── */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:flex-end;}
+.sheet{background:var(--s1);border-radius:24px 24px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:0 0 calc(16px + var(--safe-b));animation:slideUp 0.3s ease;}
+.sheet-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 16px;}
+.sheet-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:600;padding:0 20px 16px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.sheet-body{padding:0 20px;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+
+/* ── IMPORT TABS ── */
+.imp-tabs{display:flex;background:var(--s2);border-radius:var(--r);padding:3px;gap:2px;margin-bottom:16px;}
+.imp-tab{flex:1;padding:9px 6px;border-radius:10px;border:none;background:transparent;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.15s;text-align:center;}
+.imp-tab.active{background:var(--s1);color:var(--text);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const{useState,useEffect,useRef,useCallback,useMemo}=React;
+const h=React.createElement;
+
+// ── CONSTANTS ──
+const AV_PAL=['#10b981','#6366f1','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316'];
+const INV_COL=['#6366f1','#8b5cf6','#10b981','#f59e0b','#06b6d4','#ec4899','#f97316'];
+const GOAL_COL=['#10b981','#6366f1','#f59e0b','#8b5cf6','#06b6d4','#ec4899'];
+const CAT_COL={Housing:'#6366f1',Food:'#f59e0b',Groceries:'#10b981',Shopping:'#ec4899',Transport:'#8b5cf6',Lifestyle:'#f97316',Growth:'#06b6d4',Health:'#ec4899',Misc:'#64748b',Family:'#ef4444',Savings:'#10b981'};
+const CAT_ICO={Housing:'🏠',Food:'🍔',Groceries:'🛒',Shopping:'🛍️',Transport:'🚗',Lifestyle:'🎭',Growth:'📚',Health:'💊',Misc:'📦',Family:'👨‍👩‍👧'};
+const CATS=['Housing','Food','Groceries','Shopping','Transport','Lifestyle','Growth','Health','Misc'];
+
+const MERCHANTS={
+  swiggy:{name:'Swiggy',icon:'🍔',cat:'Food',patterns:[/swiggy/i,/instamart/i]},
+  zomato:{name:'Zomato',icon:'🍕',cat:'Food',patterns:[/zomato/i]},
+  blinkit:{name:'Blinkit',icon:'⚡',cat:'Groceries',patterns:[/blinkit/i,/grofers/i]},
+  zepto:{name:'Zepto',icon:'🟡',cat:'Groceries',patterns:[/zepto/i]},
+  bigbasket:{name:'BigBasket',icon:'🛒',cat:'Groceries',patterns:[/bigbasket/i]},
+  amazon:{name:'Amazon',icon:'📦',cat:'Shopping',patterns:[/amazon/i,/amzn/i]},
+  flipkart:{name:'Flipkart',icon:'🛒',cat:'Shopping',patterns:[/flipkart/i,/myntra/i]},
+  meesho:{name:'Meesho',icon:'🏪',cat:'Shopping',patterns:[/meesho/i]},
+  nykaa:{name:'Nykaa',icon:'💄',cat:'Shopping',patterns:[/nykaa/i]},
+  uber:{name:'Uber',icon:'🚗',cat:'Transport',patterns:[/uber/i]},
+  ola:{name:'Ola',icon:'🟡',cat:'Transport',patterns:[/\bola\b/i,/olacabs/i]},
+  rapido:{name:'Rapido',icon:'🏍️',cat:'Transport',patterns:[/rapido/i]},
+  bookmyshow:{name:'BookMyShow',icon:'🎬',cat:'Lifestyle',patterns:[/bookmyshow/i]},
+  netflix:{name:'Netflix',icon:'🎬',cat:'Lifestyle',patterns:[/netflix/i]},
+  spotify:{name:'Spotify',icon:'🎵',cat:'Lifestyle',patterns:[/spotify/i]},
+};
+const QUICK_M=[
+  {k:'swiggy',n:'Swiggy',i:'🍔',c:'Food'},{k:'zomato',n:'Zomato',i:'🍕',c:'Food'},
+  {k:'blinkit',n:'Blinkit',i:'⚡',c:'Groceries'},{k:'zepto',n:'Zepto',i:'🟡',c:'Groceries'},
+  {k:'bigbasket',n:'BigBasket',i:'🛒',c:'Groceries'},{k:'amazon',n:'Amazon',i:'📦',c:'Shopping'},
+  {k:'flipkart',n:'Flipkart',i:'🛒',c:'Shopping'},{k:'uber',n:'Uber',i:'🚗',c:'Transport'},
+  {k:'ola',n:'Ola',i:'🟡',c:'Transport'},{k:'rapido',n:'Rapido',i:'🏍️',c:'Transport'},
+  {k:'netflix',n:'Netflix',i:'🎬',c:'Lifestyle'},{k:'other',n:'Other',i:'➕',c:'Misc'},
+];
+
+// ── HELPERS ──
+const fmt=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const fmtK=n=>{n=Math.round(n);if(n>=10000000)return'₹'+(n/10000000).toFixed(2)+'Cr';if(n>=100000)return'₹'+(n/100000).toFixed(2)+'L';if(n>=1000)return'₹'+(n/1000).toFixed(1)+'K';return fmt(n);};
+const pct=(a,b)=>b>0?Math.min(100,Math.round(a/b*100)):0;
+const avC=n=>AV_PAL[n.charCodeAt(0)%AV_PAL.length];
+const hashPw=pw=>{let h=0;for(let i=0;i<pw.length;i++){h=((h<<5)-h)+pw.charCodeAt(i);h|=0;}return h.toString(36);};
+const todayMo=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;};
+const moLbl=m=>{const[y,mo]=m.split('-');return new Date(y,mo-1,1).toLocaleDateString('en-IN',{month:'short',year:'2-digit'});};
+
+// ── SMS PARSER ──
+function parseSMS(text){
+  const txns=[];
+  const blocks=text.split(/(?=(?:Dear|INR|Rs\.|Your\s+\w|A\/c\s+\w))/i).filter(b=>b.trim().length>15);
+  const toProcess=blocks.length>1?blocks:[text];
+  const amtPs=[
+    /(?:debited|debit|paid|spent|withdrawn)\s+(?:of\s+)?(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)/i,
+    /(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)\s+(?:debited|paid)/i,
+    /(?:INR|Rs\.?|₹)([\d,]+(?:\.\d{1,2})?)/i,
+  ];
+  const merPs=[
+    /(?:at|to|towards)\s+([A-Z][A-Za-z0-9\s&\-.]+?)(?:\s+on|\s+ref|\s+via|\.|$)/i,
+  ];
+  toProcess.forEach(block=>{
+    if(/credit|received|refund/i.test(block)&&!/debit/i.test(block))return;
+    if(!/debit|paid|spent|withdrawn/i.test(block))return;
+    let amt=null,merchant='Unknown',icon='💳',cat='Misc',knownName=null;
+    for(const p of amtPs){const m=block.match(p);if(m){amt=parseFloat(m[1].replace(/,/g,''));break;}}
+    if(!amt||amt<1)return;
+    for(const p of merPs){const m=block.match(p);if(m){merchant=m[1].trim().slice(0,30);break;}}
+    for(const[,info]of Object.entries(MERCHANTS)){if(info.patterns.some(p=>p.test(merchant)||p.test(block))){cat=info.cat;icon=info.icon;knownName=info.name;break;}}
+    txns.push({id:Date.now()+Math.random(),merchant:knownName||merchant,icon,amt,cat,date:new Date().toLocaleDateString('en-IN'),selected:true});
+  });
+  return txns;
+}
+
+function parseEmail(text){
+  if(!text.trim())return[];
+  let merchant='Unknown',icon='📧',cat='Shopping';
+  for(const[,info]of Object.entries(MERCHANTS)){if(info.patterns.some(p=>p.test(text))){merchant=info.name;icon=info.icon;cat=info.cat;break;}}
+  const ps=[
+    /(?:order total|total amount|amount paid|grand total)[:\s]+(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)/i,
+    /(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)\s*(?:has been(?:charged|debited))/i,
+  ];
+  for(const p of ps){const m=text.match(p);if(m){const a=parseFloat(m[1].replace(/,/g,''));if(a>0)return[{id:Date.now(),merchant,icon,amt:a,cat,date:new Date().toLocaleDateString('en-IN'),selected:true}];}}
+  const amts=[];const re=/(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)/gi;let m;
+  while((m=re.exec(text))!==null){const a=parseFloat(m[1].replace(/,/g,''));if(a>10)amts.push(a);}
+  if(amts.length)return[{id:Date.now(),merchant,icon,amt:Math.max(...amts),cat,date:new Date().toLocaleDateString('en-IN'),selected:true}];
+  return[];
+}
+
+// ── STORAGE ──
+const LS='vault_pwa_v1';
+function loadP(){try{return JSON.parse(localStorage.getItem(LS))||{};}catch{return{};}}
+function saveP(ps){try{localStorage.setItem(LS,JSON.stringify(ps));}catch(e){console.warn('Storage full',e);}}
+
+// ── DEFAULT DATA ──
+function mkProfile(name){
+  return{name,createdAt:Date.now(),
+    settings:{salary:113067,remittance:50000,projYears:3},
+    expenses:[
+      {id:1,lbl:'Rent',cat:'Housing',amt:14000},{id:2,lbl:'Electricity',cat:'Housing',amt:1000},
+      {id:3,lbl:'Internet & Mobile',cat:'Housing',amt:1000},{id:4,lbl:'Groceries',cat:'Groceries',amt:4500},
+      {id:5,lbl:'Dining out',cat:'Food',amt:3500},{id:6,lbl:'Snacks',cat:'Food',amt:800},
+      {id:7,lbl:'Scooty EMI',cat:'Transport',amt:3500},{id:8,lbl:'Fuel',cat:'Transport',amt:600},
+      {id:9,lbl:'Gym',cat:'Lifestyle',amt:2500},{id:10,lbl:'OTT',cat:'Lifestyle',amt:700},
+      {id:11,lbl:'Shopping',cat:'Shopping',amt:1500},{id:12,lbl:'Personal care',cat:'Lifestyle',amt:1000},
+      {id:13,lbl:'Upskilling',cat:'Growth',amt:5000},{id:14,lbl:'Books',cat:'Growth',amt:1000},
+      {id:15,lbl:'Medical',cat:'Health',amt:500},{id:16,lbl:'Buffer',cat:'Misc',amt:1500},
+    ],
+    investments:[
+      {id:1,name:'Bank Savings',color:'#6366f1',goal:200000,fixedAmt:0,useFixed:false,rate:4,compound:'monthly'},
+      {id:2,name:'Liquid MF',color:'#8b5cf6',goal:300000,fixedAmt:0,useFixed:false,rate:7,compound:'monthly'},
+    ],
+    bonuses:[{id:1,name:'Joining Bonus',planned:68800,actual:''}],
+    customGoals:[
+      {id:1,name:'Emergency Fund',emoji:'🛡️',targetAmt:500000,savedAmt:0,color:'#10b981',note:'6 months'},
+      {id:2,name:'Laptop',emoji:'💻',targetAmt:80000,savedAmt:0,color:'#6366f1',note:''},
+    ],
+    monthActuals:{},
+    spendingLog:{},
+    nextExpId:17,nextInvId:3,nextBonId:2,nextGoalId:3,nextTxnId:1,
+  };
+}
+
+// ── CHARTS ──
+const charts={};
+function mkChart(id,cfg){if(charts[id]){try{charts[id].destroy();}catch{}delete charts[id];}const c=document.getElementById(id);if(!c)return null;charts[id]=new Chart(c.getContext('2d'),cfg);return charts[id];}
+
+// ════════════════════════════
+// AUTH
+// ════════════════════════════
+function Auth({onLogin}){
+  const[view,setView]=useState('list');
+  const[sel,setSel]=useState(null);
+  const[pw,setPw]=useState('');
+  const[name,setName]=useState('');
+  const[pw2,setPw2]=useState('');
+  const[pw3,setPw3]=useState('');
+  const[err,setErr]=useState('');
+  const[ps,setPs]=useState(loadP);
+  const list=Object.keys(ps);
+
+  function doLogin(){
+    setErr('');
+    const p=ps[sel];
+    if(!p){setErr('Not found.');return;}
+    if(p.pwHash!==hashPw(pw)){setErr('Wrong password. Try again.');return;}
+    onLogin(sel,JSON.parse(JSON.stringify(p.data)));
+  }
+  function doCreate(){
+    setErr('');
+    const n=name.trim();
+    if(!n){setErr('Enter your name.');return;}
+    if(pw2.length<4){setErr('Password needs at least 4 characters.');return;}
+    if(pw2!==pw3){setErr('Passwords do not match.');return;}
+    if(ps[n]){setErr('Name already taken. Choose another.');return;}
+    const data=mkProfile(n);
+    const updated={...ps,[n]:{pwHash:hashPw(pw2),data}};
+    saveP(updated);setPs(updated);onLogin(n,data);
+  }
+
+  return h('div',{className:'auth-wrap'},
+    h('div',{className:'auth-logo'},'Vault',h('span',{className:'dot'},'.')),
+    h('div',{className:'auth-tag'},'budget · investments · spending'),
+    h('div',{className:'auth-card'},
+      view==='list'&&h('div',null,
+        list.length>0&&h('div',null,
+          h('label',{className:'fl'},'Your profile'),
+          h('div',{className:'pgrid'},list.map(n=>h('div',{key:n,className:'pcard',onClick:()=>{setSel(n);setView('login');setPw('');setErr('');}},
+            h('div',{className:'pav',style:{background:avC(n)}},n[0].toUpperCase()),
+            h('div',null,h('div',{style:{fontWeight:'600',fontSize:'15px'}},n),h('div',{style:{fontSize:'12px',color:'var(--muted)'}},'tap to sign in')),
+          ))),
+          h('div',{className:'or-d'},'or'),
+        ),
+        list.length===0&&h('div',{style:{textAlign:'center',marginBottom:'24px'}},h('div',{style:{fontSize:'3rem',marginBottom:'10px'}},'🏦'),h('div',{style:{color:'var(--muted)',fontSize:'14px'}},'No profiles yet. Create yours below.')),
+        h('button',{className:'pbtn',onClick:()=>{setView('create');setErr('');}},list.length>0?'+ Create new profile':'Create profile →'),
+      ),
+      view==='login'&&h('div',null,
+        h('div',{style:{display:'flex',alignItems:'center',gap:'14px',padding:'14px',background:'var(--s2)',borderRadius:'var(--rl)',marginBottom:'20px'}},
+          h('div',{className:'pav',style:{background:avC(sel),width:'48px',height:'48px',fontSize:'18px'}},sel[0].toUpperCase()),
+          h('div',null,h('div',{style:{fontWeight:'600',fontSize:'16px'}},sel),h('div',{style:{fontSize:'12px',color:'var(--muted)'}},'Welcome back'))),
+        err&&h('div',{className:'err'},err),
+        h('label',{className:'fl'},'Password'),
+        h('input',{className:'fi',type:'password',placeholder:'Enter password',value:pw,onChange:e=>setPw(e.target.value),onKeyDown:e=>e.key==='Enter'&&doLogin(),autoFocus:true}),
+        h('button',{className:'pbtn',onClick:doLogin},'Sign in →'),
+        h('span',{className:'lnk',onClick:()=>{setView('list');setErr('');}},h('span',{style:{color:'var(--muted)'}},'← '),'All profiles'),
+      ),
+      view==='create'&&h('div',null,
+        h('div',{style:{fontFamily:"'Syne',sans-serif",fontWeight:'600',fontSize:'1.2rem',marginBottom:'20px'}},'Create your profile'),
+        err&&h('div',{className:'err'},err),
+        h('label',{className:'fl'},'Your name'),
+        h('input',{className:'fi',placeholder:'e.g. Prince Kumar',value:name,onChange:e=>setName(e.target.value),autoFocus:true}),
+        h('label',{className:'fl'},'Password (min. 4 characters)'),
+        h('input',{className:'fi',type:'password',placeholder:'Create a password',value:pw2,onChange:e=>setPw2(e.target.value)}),
+        h('label',{className:'fl'},'Confirm password'),
+        h('input',{className:'fi',type:'password',placeholder:'Type again',value:pw3,onChange:e=>setPw3(e.target.value),onKeyDown:e=>e.key==='Enter'&&doCreate()}),
+        h('button',{className:'pbtn',onClick:doCreate},'Create & start →'),
+        h('span',{className:'lnk',onClick:()=>{setView('list');setErr('');}},h('span',{style:{color:'var(--muted)'}},'← '),'Back'),
+      ),
+    )
+  );
+}
+
+// ════════════════════════════
+// MAIN APP
+// ════════════════════════════
+function App(){
+  const[user,setUser]=useState(null);
+  const[data,setData]=useState(null);
+  const[page,setPage]=useState('home');
+  const[saving,setSaving]=useState(false);
+  const[installPrompt,setInstallPrompt]=useState(null);
+  const[showInstall,setShowInstall]=useState(false);
+  const timer=useRef(null);
+
+  useEffect(()=>{
+    const handler=e=>{e.preventDefault();setInstallPrompt(e);setShowInstall(true);};
+    window.addEventListener('beforeinstallprompt',handler);
+    // iOS detection
+    const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+    const isStandalone=window.navigator.standalone;
+    if(isIOS&&!isStandalone) setShowInstall(true);
+    return()=>window.removeEventListener('beforeinstallprompt',handler);
+  },[]);
+
+  function login(name,d){setUser(name);setData(d);setPage('home');}
+  function logout(){setUser(null);setData(null);Object.keys(charts).forEach(k=>{try{charts[k].destroy();}catch{}delete charts[k];});}
+
+  function update(fn){
+    setData(prev=>{
+      const next=fn(JSON.parse(JSON.stringify(prev)));
+      clearTimeout(timer.current);setSaving(true);
+      timer.current=setTimeout(()=>{const ps=loadP();if(ps[user]){ps[user].data=next;saveP(ps);}setSaving(false);},700);
+      return next;
+    });
+  }
+
+  async function handleInstall(){
+    if(installPrompt){await installPrompt.prompt();setShowInstall(false);}
+    else{alert('To install on iPhone:\n1. Tap the Share button (box with arrow)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');}
+  }
+
+  if(!user)return h(Auth,{onLogin:login});
+  if(!data)return h('div',{style:{display:'flex',height:'100%',alignItems:'center',justifyContent:'center'}},h('div',{style:{width:'24px',height:'24px',border:'2px solid var(--border)',borderTopColor:'var(--accent)',borderRadius:'50%',animation:'spin 0.7s linear infinite'}}));
+
+  const S=data.settings;
+  const sal=S.salary||0,remit=S.remittance||0,years=S.projYears||3;
+  const available=sal-remit;
+  const totalExp=data.expenses.reduce((s,e)=>s+e.amt,0);
+  const projSave=available-totalExp;
+  const MONTHS=years*12;
+  const mo=todayMo();
+  const thisMonthLog=(data.spendingLog||{})[mo]||[];
+  const thisMonthSpend=thisMonthLog.reduce((s,t)=>s+t.amt,0);
+  const totalFixed=data.investments.filter(i=>i.useFixed).reduce((s,i)=>s+i.fixedAmt,0);
+  const autoInvs=data.investments.filter(i=>!i.useFixed);
+  const remainAuto=Math.max(0,projSave-totalFixed);
+  function invMo(inv){if(inv.useFixed)return inv.fixedAmt;return autoInvs.length>0?Math.round(remainAuto/autoInvs.length):0;}
+  function fv(inv){const r=inv.rate/100,n=MONTHS,m=invMo(inv);if(inv.compound==='monthly'){const rm=r/12;return rm>0?m*(Math.pow(1+rm,n)-1)/rm*(1+rm):m*n;}let t=0;for(let y=0;y<years;y++){t=(t+m*12)*Math.pow(1+r,1);}return t;}
+  function actualByInv(id){let s=0;Object.values(data.monthActuals).forEach(m=>{const v=m[id];if(v!==''&&v!==undefined)s+=parseFloat(v)||0;});return s;}
+  const bonusActual=data.bonuses.reduce((s,b)=>s+(b.actual!==''?parseFloat(b.actual)||0:0),0);
+  const totalActual=data.investments.reduce((s,i)=>s+actualByInv(i.id),0)+bonusActual;
+  const totalFV=data.investments.reduce((s,i)=>s+fv(i),0);
+
+  const NAV=[
+    {id:'home',icon:'🏠',label:'Home'},
+    {id:'spend',icon:'💳',label:'Spending',badge:thisMonthLog.length||null},
+    {id:'goals',icon:'🎯',label:'Goals'},
+    {id:'invest',icon:'📈',label:'Invest'},
+    {id:'more',icon:'⚙️',label:'More'},
+  ];
+
+  return h('div',{className:'app-shell'},
+    // TOP BAR
+    h('div',{className:'top-bar'},
+      h('div',{className:'tb-logo'},'Vault',h('span',{className:'dot'},'.')),
+      h('div',{className:'tb-user'},
+        h('div',{className:'tb-av',style:{background:avC(user)}},user[0].toUpperCase()),
+        h('div',{className:'tb-name'},user),
+        saving&&h('div',{className:'tb-save'},'saving…'),
+      ),
+      h('button',{className:'tb-out',onClick:logout},'Exit'),
+    ),
+
+    // SCROLL AREA
+    h('div',{className:'scroll-area'},
+      h('div',{className:'page-content'},
+        page==='home'&&h(HomePage,{data,update,sal,remit,available,totalExp,projSave,thisMonthSpend,thisMonthLog,totalActual,totalFV,years,bonusActual}),
+        page==='spend'&&h(SpendPage,{data,update,mo,thisMonthLog,thisMonthSpend}),
+        page==='goals'&&h(GoalsPage,{data,update,projSave}),
+        page==='invest'&&h(InvestPage,{data,update,projSave,invMo,fv,years,MONTHS,totalFixed,remainAuto,actualByInv}),
+        page==='tracker'&&h(TrackerPage,{data,update,sal,remit,totalExp,projSave,invMo,years,MONTHS}),
+        page==='more'&&h(MorePage,{data,update,S,sal,remit,years,logout,user}),
+      )
+    ),
+
+    // BOTTOM NAV
+    h('div',{className:'bottom-nav'},
+      NAV.map(n=>h('button',{key:n.id,className:'bn-item '+(page===n.id?'active':''),onClick:()=>setPage(n.id),style:{position:'relative'}},
+        h('div',{className:'bn-icon'},n.icon),
+        h('div',{className:'bn-label'},n.label),
+        n.badge&&h('div',{className:'bn-badge'},n.badge>9?'9+':n.badge),
+      ))
+    ),
+
+    // INSTALL BANNER
+    showInstall&&h('div',{className:'install-banner'},
+      h('div',{className:'ib-icon'},'📲'),
+      h('div',{className:'ib-text'},
+        h('div',{className:'ib-title'},'Install Vault'),
+        h('div',{className:'ib-sub'},/iphone|ipad|ipod/i.test(navigator.userAgent)?'Tap Share → Add to Home Screen':'Add to your home screen'),
+      ),
+      h('button',{className:'ib-btn',onClick:handleInstall},'Install'),
+      h('button',{className:'ib-close',onClick:()=>setShowInstall(false)},'✕'),
+    ),
+  );
+}
+
+// ════════════════════════════
+// HOME PAGE
+// ════════════════════════════
+function HomePage({data,update,sal,remit,available,totalExp,projSave,thisMonthSpend,thisMonthLog,totalActual,totalFV,years,bonusActual}){
+  const catSpend={};
+  thisMonthLog.forEach(t=>{catSpend[t.cat]=(catSpend[t.cat]||0)+t.amt;});
+  const catEntries=Object.entries(catSpend).sort((a,b)=>b[1]-a[1]);
+
+  return h('div',null,
+    // Hero card
+    h('div',{style:{background:'linear-gradient(135deg,#0d1f17,#0d1027)',border:'1px solid var(--gb)',borderRadius:'var(--rxl)',padding:'20px',marginBottom:'14px'}},
+      h('div',{style:{fontSize:'12px',color:'var(--green)',fontFamily:"'JetBrains Mono',monospace",marginBottom:'4px',textTransform:'uppercase',letterSpacing:'0.08em'}},'Monthly savings'),
+      h('div',{style:{fontSize:'2.2rem',fontFamily:"'Syne',sans-serif",fontWeight:'700',color:projSave<0?'var(--red)':projSave<5000?'var(--amber)':'var(--green)',letterSpacing:'-0.02em',marginBottom:'4px'}},fmt(projSave)),
+      h('div',{style:{fontSize:'12px',color:'var(--muted)'}},sal>0?pct(projSave,sal)+'% of take-home':'Set your salary in Settings'),
+    ),
+
+    h('div',{className:'met-row m2'},
+      h('div',{className:'met'},h('div',{className:'ml'},'This month spent'),h('div',{className:'mv a'},fmtK(thisMonthSpend)),h('div',{className:'ms'},thisMonthLog.length+' transactions')),
+      h('div',{className:'met'},h('div',{className:'ml'},'Total saved'),h('div',{className:'mv p'},fmtK(totalActual)),h('div',{className:'ms'},'all buckets')),
+    ),
+    h('div',{className:'met-row m2'},
+      h('div',{className:'met'},h('div',{className:'ml'},'Available'),h('div',{className:'mv t'},fmt(available)),h('div',{className:'ms'},'after remittance')),
+      h('div',{className:'met'},h('div',{className:'ml'},years+'yr portfolio'),h('div',{className:'mv g'},fmtK(totalFV)),h('div',{className:'ms'},'with interest')),
+    ),
+
+    thisMonthSpend>0&&h('div',{className:'card'},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},'This month breakdown')),
+      h('div',{className:'spend-bar'},
+        catEntries.map(([cat,amt])=>h('div',{key:cat,className:'spend-seg',style:{width:pct(amt,thisMonthSpend)+'%',background:CAT_COL[cat]||'#64748b'}},pct(amt,thisMonthSpend)>12?cat.slice(0,3):'')),
+      ),
+      h('div',{className:'spend-legend'},
+        catEntries.map(([cat,amt])=>h('div',{key:cat,className:'sl-item'},h('div',{className:'sl-dot',style:{background:CAT_COL[cat]||'#64748b'}}),h('span',null,cat),h('span',{style:{fontFamily:"'JetBrains Mono',monospace",color:'var(--text)',marginLeft:'4px'}},fmt(amt)))),
+      )
+    ),
+
+    // Quick goals preview
+    (data.customGoals||[]).length>0&&h('div',{className:'card'},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},'Goals'),),
+      (data.customGoals||[]).slice(0,3).map(g=>{
+        const p=pct(g.savedAmt||0,g.targetAmt);
+        return h('div',{key:g.id,style:{marginBottom:'12px'}},
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'5px'}},
+            h('div',{style:{display:'flex',alignItems:'center',gap:'7px',fontSize:'13px',fontWeight:'500'}},g.emoji,' ',g.name),
+            h('div',{style:{fontSize:'11px',fontFamily:"'JetBrains Mono',monospace",color:g.color}},p+'%'),
+          ),
+          h('div',{className:'goal-bar-track',style:{height:'6px',background:'var(--border)',borderRadius:'3px',overflow:'hidden'}},
+            h('div',{style:{height:'6px',borderRadius:'3px',background:g.color,width:p+'%',transition:'width 0.4s'}}),
+          ),
+        );
+      })
+    ),
+
+    // Insights preview
+    h('div',{className:'card'},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},'Quick insights')),
+      projSave<0&&h('div',{className:'sug alert'},'⚠️ Over budget by '+fmt(Math.abs(projSave))+'. Check expenses.'),
+      projSave>=0&&projSave<5000&&h('div',{className:'sug warn'},'Savings are thin at '+fmt(projSave)+'/month. Look for cuts in dining or lifestyle.'),
+      projSave>=10000&&h('div',{className:'sug good'},'Solid '+fmt(projSave)+'/month saved. Auto-transfer on salary day.'),
+      thisMonthSpend>0&&h('div',{className:'sug info'},'You\'ve spent '+fmt(thisMonthSpend)+' so far this month across '+thisMonthLog.length+' transactions.'),
+      h('div',{className:'sug tip'},'💡 Your investments grow to '+fmtK(totalFV)+' in '+years+' years. Set your rates accurately in the Invest tab.'),
+    ),
+  );
+}
+
+// ════════════════════════════
+// SPEND PAGE
+// ════════════════════════════
+function SpendPage({data,update,mo,thisMonthLog,thisMonthSpend}){
+  const[impTab,setImpTab]=useState('quick');
+  const[smsText,setSmsText]=useState('');
+  const[emailText,setEmailText]=useState('');
+  const[parsed,setParsed]=useState([]);
+  const[selM,setSelM]=useState(null);
+  const[qaAmt,setQaAmt]=useState('');
+  const[qaNote,setQaNote]=useState('');
+  const[qaCat,setQaCat]=useState('Misc');
+
+  function doParseSMS(){setParsed(parseSMS(smsText));}
+  function doParseEmail(){setParsed(parseEmail(emailText));}
+
+  function importSelected(){
+    update(d=>{
+      if(!d.spendingLog)d.spendingLog={};
+      if(!d.spendingLog[mo])d.spendingLog[mo]=[];
+      parsed.filter(t=>t.selected).forEach(t=>{d.spendingLog[mo].push({id:d.nextTxnId++,merchant:t.merchant,icon:t.icon,amt:t.amt,cat:t.cat,date:t.date,note:''});});
+      return d;
+    });
+    setParsed([]);setSmsText('');setEmailText('');
+  }
+
+  function addQuick(){
+    if(!selM||!qaAmt)return;
+    const m=QUICK_M.find(x=>x.k===selM)||{n:selM,i:'➕',c:qaCat};
+    update(d=>{
+      if(!d.spendingLog)d.spendingLog={};
+      if(!d.spendingLog[mo])d.spendingLog[mo]=[];
+      d.spendingLog[mo].push({id:d.nextTxnId++,merchant:m.n,icon:m.i,amt:parseFloat(qaAmt)||0,cat:m.k==='other'?qaCat:m.c,date:new Date().toLocaleDateString('en-IN'),note:qaNote});
+      return d;
+    });
+    setQaAmt('');setQaNote('');
+  }
+
+  function delTxn(id){update(d=>{if(d.spendingLog?.[mo])d.spendingLog[mo]=d.spendingLog[mo].filter(t=>t.id!==id);return d;});}
+
+  const catSpend={};thisMonthLog.forEach(t=>{catSpend[t.cat]=(catSpend[t.cat]||0)+t.amt;});
+
+  return h('div',null,
+    h('div',{className:'sec-hdr'},h('div',{className:'sec-title'},'Spending'),h('div',{className:'sec-sub'},'Track every rupee · '+moLbl(mo))),
+
+    h('div',{className:'met-row m2'},
+      h('div',{className:'met'},h('div',{className:'ml'},'This month'),h('div',{className:'mv a'},fmtK(thisMonthSpend))),
+      h('div',{className:'met'},h('div',{className:'ml'},'Transactions'),h('div',{className:'mv'},thisMonthLog.length)),
+    ),
+
+    // Import section
+    h('div',{className:'card'},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},'Add transaction')),
+      h('div',{className:'imp-tabs'},
+        [{id:'quick',l:'⚡ Quick'},{id:'sms',l:'📱 SMS'},{id:'email',l:'📧 Email'}].map(t=>
+          h('button',{key:t.id,className:'imp-tab '+(impTab===t.id?'active':''),onClick:()=>{setImpTab(t.id);setParsed([]);}},t.l)
+        )
+      ),
+
+      impTab==='quick'&&h('div',null,
+        h('div',{className:'qa-scroll'},
+          QUICK_M.map(m=>h('div',{key:m.k,className:'qa-chip '+(selM===m.k?'sel':''),onClick:()=>{setSelM(m.k);setQaCat(m.c);}},
+            h('div',{className:'qa-chip-icon'},m.i),h('div',{className:'qa-chip-name'},m.n)
+          ))
+        ),
+        h('div',{className:'field'},
+          h('label',{className:'field-lbl'},'Note (optional)'),
+          h('input',{className:'field-inp',placeholder:'What did you order?',value:qaNote,onChange:e=>setQaNote(e.target.value)}),
+        ),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr auto',gap:'10px',alignItems:'flex-end'}},
+          h('div',{className:'field',style:{marginBottom:0}},
+            h('label',{className:'field-lbl'},'Amount (₹)'),
+            h('input',{className:'field-inp right',type:'number',placeholder:'0',value:qaAmt,onChange:e=>setQaAmt(e.target.value),onKeyDown:e=>e.key==='Enter'&&addQuick()}),
+          ),
+          h('button',{className:'btn btn-g',style:{padding:'13px 20px'},onClick:addQuick},'Add'),
+        ),
+        selM==='other'&&h('div',{className:'field',style:{marginTop:'10px'}},
+          h('label',{className:'field-lbl'},'Category'),
+          h('select',{className:'field-sel',value:qaCat,onChange:e=>setQaCat(e.target.value)},CATS.map(c=>h('option',{key:c},c))),
+        ),
+      ),
+
+      impTab==='sms'&&h('div',null,
+        h('div',{className:'notice'},'Copy bank SMS messages (debit alerts) and paste below. Works with all Indian banks.'),
+        h('textarea',{className:'sms-ta',placeholder:'Paste SMS text here...\n\nExample: Your a/c XX1234 debited Rs.450 for Swiggy. Avl bal Rs.23,456',value:smsText,onChange:e=>setSmsText(e.target.value)}),
+        h('div',{style:{display:'flex',gap:'8px',marginTop:'10px'}},
+          h('button',{className:'btn btn-g btn-full',onClick:doParseSMS},'Parse SMS →'),
+        ),
+        parsed.length>0&&h('div',{style:{marginTop:'14px'}},
+          h('div',{style:{fontSize:'13px',fontWeight:'500',marginBottom:'10px'}},parsed.filter(t=>t.selected).length+' found'),
+          parsed.map((t,i)=>h('div',{key:t.id,className:'ptxn'},
+            h('input',{type:'checkbox',className:'ptxn-check',checked:t.selected,onChange:()=>setParsed(prev=>prev.map((x,j)=>j===i?{...x,selected:!x.selected}:x))}),
+            h('div',{className:'ptxn-ico'},t.icon),
+            h('div',{className:'ptxn-body'},h('div',{className:'ptxn-name'},t.merchant),h('div',{style:{fontSize:'11px',color:'var(--muted)'}},t.cat,' · ',t.date)),
+            h('div',{className:'ptxn-amt'},fmt(t.amt)),
+          )),
+          h('button',{className:'btn btn-g btn-full',style:{marginTop:'10px'},onClick:importSelected},'Import selected →'),
+        ),
+      ),
+
+      impTab==='email'&&h('div',null,
+        h('div',{className:'notice'},'Copy the full text of an order confirmation email and paste below.'),
+        h('textarea',{className:'sms-ta',style:{minHeight:'120px'},placeholder:'Paste email content here...',value:emailText,onChange:e=>setEmailText(e.target.value)}),
+        h('button',{className:'btn btn-g btn-full',style:{marginTop:'10px'},onClick:doParseEmail},'Extract transaction →'),
+        parsed.length>0&&h('div',{style:{marginTop:'14px'}},
+          parsed.map((t,i)=>h('div',{key:t.id,className:'ptxn'},
+            h('input',{type:'checkbox',className:'ptxn-check',checked:t.selected,onChange:()=>setParsed(prev=>prev.map((x,j)=>j===i?{...x,selected:!x.selected}:x))}),
+            h('div',{className:'ptxn-ico'},t.icon),
+            h('div',{className:'ptxn-body'},h('div',{className:'ptxn-name'},t.merchant),h('div',{style:{fontSize:'11px',color:'var(--muted)'}},t.cat)),
+            h('div',{className:'ptxn-amt'},fmt(t.amt)),
+          )),
+          h('button',{className:'btn btn-g btn-full',style:{marginTop:'10px'},onClick:importSelected},'Import →'),
+        ),
+      ),
+    ),
+
+    // Transaction list
+    thisMonthLog.length>0&&h('div',{className:'card'},
+      h('div',{className:'card-hdr'},
+        h('div',{className:'card-ttl'},'This month'),
+        h('div',{style:{fontFamily:"'JetBrains Mono',monospace",fontSize:'14px',color:'var(--red)',fontWeight:'600'}},fmt(thisMonthSpend)),
+      ),
+      [...thisMonthLog].reverse().map(t=>h('div',{key:t.id,className:'txn-item'},
+        h('div',{className:'txn-ico',style:{background:CAT_COL[t.cat]||'#64748b'}},t.icon),
+        h('div',{className:'txn-body'},h('div',{className:'txn-name'},t.merchant),h('div',{className:'txn-meta'},t.cat,' · ',t.date,t.note&&' · '+t.note)),
+        h('div',{className:'txn-amt'},fmt(t.amt)),
+        h('button',{className:'btn-d',onClick:()=>delTxn(t.id)},'×'),
+      ))
+    ),
+
+    thisMonthLog.length===0&&h('div',{className:'empty-state'},h('div',{className:'big'},'📭'),h('div',null,'No transactions yet this month'),h('div',{style:{fontSize:'13px',color:'var(--dim)',marginTop:'6px'}},'Use Quick add, SMS, or Email import above')),
+  );
+}
+
+// ════════════════════════════
+// GOALS PAGE
+// ════════════════════════════
+function GoalsPage({data,update,projSave}){
+  const[addAmt,setAddAmt]=useState({});
+  const goals=data.customGoals||[];
+
+  function addGoal(){update(d=>{const col=GOAL_COL[(d.nextGoalId||3)%GOAL_COL.length];(d.customGoals=d.customGoals||[]).push({id:d.nextGoalId++,name:'New Goal',emoji:'🎯',targetAmt:100000,savedAmt:0,color:col,note:''});return d;});}
+  function addSaved(id){const a=parseFloat(addAmt[id])||0;if(!a)return;update(d=>{const g=(d.customGoals||[]).find(x=>x.id===id);if(g)g.savedAmt=Math.min(g.targetAmt,(g.savedAmt||0)+a);return d;});setAddAmt(a=>({...a,[id]:''}))}
+
+  return h('div',null,
+    h('div',{className:'sec-hdr'},h('div',{className:'sec-title'},'Goals'),h('div',{className:'sec-sub'},'Save for anything you want')),
+    h('div',{style:{display:'flex',justifyContent:'flex-end',marginBottom:'14px'}},
+      h('button',{className:'btn btn-g',onClick:addGoal},'+ New goal'),
+    ),
+    goals.length===0&&h('div',{className:'empty-state'},h('div',{className:'big'},'🎯'),h('div',null,'No goals yet'),h('div',{style:{fontSize:'13px',color:'var(--dim)',marginTop:'6px'}},'Add a goal — laptop, trip, car, anything')),
+    goals.map(g=>{
+      const p=pct(g.savedAmt||0,g.targetAmt);
+      const done=(g.savedAmt||0)>=g.targetAmt;
+      const remaining=Math.max(0,g.targetAmt-(g.savedAmt||0));
+      const moLeft=projSave>0?Math.ceil(remaining/projSave):null;
+      return h('div',{key:g.id,className:'goal-card',style:{borderColor:done?g.color+'44':'var(--border)'}},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'8px'}},
+          h('div',{style:{display:'flex',alignItems:'center',gap:'10px'}},
+            h('input',{style:{background:'transparent',border:'none',fontSize:'24px',width:'36px',cursor:'text'},value:g.emoji,onChange:e=>update(d=>{(d.customGoals||[]).find(x=>x.id===g.id).emoji=e.target.value;return d;})}),
+            h('div',null,
+              h('input',{className:'inline-inp',value:g.name,style:{fontSize:'16px',fontWeight:'600'},onChange:e=>update(d=>{(d.customGoals||[]).find(x=>x.id===g.id).name=e.target.value;return d;})}),
+              h('input',{className:'inline-inp',value:g.note||'',placeholder:'Add note…',style:{fontSize:'12px',color:'var(--muted)',marginTop:'1px'},onChange:e=>update(d=>{(d.customGoals||[]).find(x=>x.id===g.id).note=e.target.value;return d;})}),
+            )
+          ),
+          h('button',{className:'btn-d',onClick:()=>update(d=>{d.customGoals=(d.customGoals||[]).filter(x=>x.id!==g.id);return d;})},'×'),
+        ),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'12px'}},
+          h('div',{className:'inv-stat'},h('div',{className:'inv-stat-l'},'Target'),h('div',{className:'inv-stat-v'},fmtK(g.targetAmt))),
+          h('div',{className:'inv-stat'},h('div',{className:'inv-stat-l'},'Saved'),h('div',{className:'inv-stat-v g'},fmtK(g.savedAmt||0))),
+        ),
+        h('div',{className:'goal-bar-wrap'},
+          h('div',{className:'goal-bar-track'},h('div',{className:'goal-bar-fill',style:{background:g.color,width:p+'%'}})),
+          h('div',{className:'goal-pct',style:{color:g.color}},p+'%'),
+          done&&h('span',{style:{fontSize:'12px',background:g.color+'22',color:g.color,padding:'2px 9px',borderRadius:'20px',border:'1px solid '+g.color+'44'}},'✓'),
+        ),
+        !done&&h('div',{style:{fontSize:'12px',color:'var(--muted)',marginBottom:'12px',fontFamily:"'JetBrains Mono',monospace"}},fmtK(remaining)+' to go',moLeft&&h('span',{style:{color:'var(--dim)'}},' · ~'+moLeft+' months')),
+
+        // Edit fields in a row
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'12px'}},
+          h('div',{className:'inv-field'},h('div',{className:'inv-field-lbl'},'Target (₹)'),h('input',{className:'inv-field-inp',type:'number',value:g.targetAmt,onChange:e=>update(d=>{(d.customGoals||[]).find(x=>x.id===g.id).targetAmt=parseFloat(e.target.value)||0;return d;})})),
+          h('div',{className:'inv-field'},h('div',{className:'inv-field-lbl'},'Total saved (₹)'),h('input',{className:'inv-field-inp',type:'number',value:g.savedAmt||0,onChange:e=>update(d=>{(d.customGoals||[]).find(x=>x.id===g.id).savedAmt=parseFloat(e.target.value)||0;return d;})})),
+        ),
+
+        h('div',{className:'goal-add-row'},
+          h('span',{style:{fontSize:'13px',color:'var(--muted)',flexShrink:0}},'Add:'),
+          h('input',{className:'goal-add-inp',type:'number',placeholder:'₹ amount',value:addAmt[g.id]||'',onChange:e=>setAddAmt(a=>({...a,[g.id]:e.target.value})),onKeyDown:e=>e.key==='Enter'&&addSaved(g.id)}),
+          h('button',{className:'btn btn-g',style:{padding:'10px 16px',flexShrink:0},onClick:()=>addSaved(g.id)},'Add'),
+          h('input',{type:'color',value:g.color,style:{width:'36px',height:'36px',border:'none',borderRadius:'8px',cursor:'pointer',flexShrink:0},onChange:e=>update(d=>{(d.customGoals||[]).find(x=>x.id===g.id).color=e.target.value;return d;})}),
+        ),
+      );
+    })
+  );
+}
+
+// ════════════════════════════
+// INVEST PAGE
+// ════════════════════════════
+function InvestPage({data,update,projSave,invMo,fv,years,MONTHS,totalFixed,remainAuto,actualByInv}){
+  useEffect(()=>{
+    const labels=Array.from({length:MONTHS},(_,i)=>{const d=new Date(2026,5+i,1);return d.toLocaleDateString('en-IN',{month:'short',year:'2-digit'});});
+    const ds=data.investments.map(inv=>({
+      label:inv.name,
+      data:Array.from({length:MONTHS},(_,m)=>{const mo=invMo(inv),r=inv.rate/100/12;return r>0?mo*(Math.pow(1+r,m+1)-1)/r*(1+r):mo*(m+1);}),
+      borderColor:inv.color,backgroundColor:inv.color+'15',fill:true,tension:0.3,borderWidth:2,pointRadius:0,
+    }));
+    mkChart('inv-c',{type:'line',data:{labels,datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:i=>` ${i.dataset.label}: ${fmtK(i.raw)}`}}},scales:{x:{ticks:{color:'#3f3e48',font:{size:9},maxTicksLimit:8},grid:{color:'#252530'}},y:{ticks:{color:'#3f3e48',font:{size:9},callback:v=>fmtK(v)},grid:{color:'#252530'}}}}});
+  },[data.investments,years,projSave]);
+
+  const bonusActual=data.bonuses.reduce((s,b)=>s+(b.actual!==''?parseFloat(b.actual)||0:0),0);
+  const totalActual=data.investments.reduce((s,i)=>s+actualByInv(i.id),0)+bonusActual;
+
+  return h('div',null,
+    h('div',{className:'sec-hdr'},h('div',{className:'sec-title'},'Investments'),h('div',{className:'sec-sub'},'Set goals, rates, and monthly amounts')),
+
+    h('div',{className:'notice'},'Proj. savings: ',h('strong',{style:{color:'var(--green)'}},fmt(projSave)),' · Fixed: ',h('strong',{style:{color:'var(--amber)'}},fmt(totalFixed)),' · Auto each: ',h('strong',{style:{color:'var(--blue)'}},fmt(data.investments.filter(i=>!i.useFixed).length>0?remainAuto/data.investments.filter(i=>!i.useFixed).length:0))),
+
+    data.investments.map(inv=>{
+      const mo=invMo(inv);const fvAmt=fv(inv);const actual=actualByInv(inv.id);
+      return h('div',{key:inv.id,className:'inv-card'},
+        h('div',{className:'inv-header'},
+          h('div',{className:'inv-dot',style:{background:inv.color}}),
+          h('input',{className:'inline-inp inv-name',value:inv.name,style:{fontSize:'15px',fontWeight:'600'},onChange:e=>update(d=>{d.investments.find(x=>x.id===inv.id).name=e.target.value;return d;})}),
+          h('button',{className:'btn-d',onClick:()=>update(d=>{d.investments=d.investments.filter(x=>x.id!==inv.id);return d;})},'×'),
+        ),
+        h('div',{className:'inv-stats'},
+          h('div',{className:'inv-stat'},h('div',{className:'inv-stat-l'},'Monthly'),h('div',{className:'inv-stat-v'},fmt(mo))),
+          h('div',{className:'inv-stat'},h('div',{className:'inv-stat-l'},years+'yr value'),h('div',{className:'inv-stat-v',style:{color:inv.color}},fmtK(fvAmt))),
+          h('div',{className:'inv-stat'},h('div',{className:'inv-stat-l'},'Interest'),h('div',{className:'inv-stat-v g'},'+'+fmtK(fvAmt-mo*MONTHS))),
+          h('div',{className:'inv-stat'},h('div',{className:'inv-stat-l'},'Actually saved'),h('div',{className:'inv-stat-v p'},fmtK(actual))),
+        ),
+        h('div',{className:'inv-fields'},
+          h('div',{className:'inv-field'},h('div',{className:'inv-field-lbl'},'Goal (₹)'),h('input',{className:'inv-field-inp',type:'number',value:inv.goal,onChange:e=>update(d=>{d.investments.find(x=>x.id===inv.id).goal=parseFloat(e.target.value)||0;return d;})})),
+          h('div',{className:'inv-field'},h('div',{className:'inv-field-lbl'},'Rate % p.a.'),h('input',{className:'inv-field-inp',type:'number',value:inv.rate,step:'0.1',onChange:e=>update(d=>{d.investments.find(x=>x.id===inv.id).rate=parseFloat(e.target.value)||0;return d;})})),
+        ),
+        h('div',{className:'mode-row'},
+          h('button',{className:'mode-btn '+(inv.useFixed?'':'on'),onClick:()=>update(d=>{d.investments.find(x=>x.id===inv.id).useFixed=false;return d;})},'Auto split'),
+          h('button',{className:'mode-btn '+(inv.useFixed?'on':''),onClick:()=>update(d=>{d.investments.find(x=>x.id===inv.id).useFixed=true;return d;})},'Fixed amount'),
+        ),
+        inv.useFixed&&h('div',{className:'field',style:{marginBottom:0}},
+          h('label',{className:'field-lbl'},'Fixed monthly (₹)'),
+          h('input',{className:'field-inp right',type:'number',value:inv.fixedAmt,onChange:e=>update(d=>{d.investments.find(x=>x.id===inv.id).fixedAmt=parseFloat(e.target.value)||0;return d;})}),
+        ),
+        h('div',{style:{display:'flex',gap:'6px',marginTop:'10px'}},
+          h('select',{className:'field-sel',style:{flex:1},value:inv.compound,onChange:e=>update(d=>{d.investments.find(x=>x.id===inv.id).compound=e.target.value;return d;})},h('option',{value:'monthly'},'Monthly compounding'),h('option',{value:'annually'},'Annual compounding')),
+          h('input',{type:'color',value:inv.color,style:{width:'44px',height:'44px',border:'none',borderRadius:'10px',cursor:'pointer'},onChange:e=>update(d=>{d.investments.find(x=>x.id===inv.id).color=e.target.value;return d;})}),
+        ),
+      );
+    }),
+
+    h('button',{className:'btn btn-g btn-full',onClick:()=>update(d=>{d.investments.push({id:d.nextInvId++,name:'New Bucket',color:INV_COL[(d.nextInvId||3)%INV_COL.length],goal:100000,fixedAmt:0,useFixed:false,rate:7,compound:'monthly'});return d;})},
+      '+ Add investment bucket',
+    ),
+
+    h('div',{className:'card',style:{marginTop:'14px'}},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},years+'-year projection')),
+      h('div',{className:'chart-w'},h('canvas',{id:'inv-c',role:'img','aria-label':'Investment growth'})),
+    ),
+
+    h('div',{className:'card'},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},'One-time bonuses')),
+      data.bonuses.map(b=>h('div',{key:b.id,style:{marginBottom:'14px'}},
+        h('div',{style:{display:'flex',gap:'8px',alignItems:'center',marginBottom:'8px'}},
+          h('input',{className:'field-inp',style:{flex:1},value:b.name,onChange:e=>update(d=>{d.bonuses.find(x=>x.id===b.id).name=e.target.value;return d;})}),
+          h('button',{className:'btn-d',onClick:()=>update(d=>{d.bonuses=d.bonuses.filter(x=>x.id!==b.id);return d;})},'×'),
+        ),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px'}},
+          h('div',{className:'inv-field'},h('div',{className:'inv-field-lbl'},'Planned (₹)'),h('input',{className:'inv-field-inp',type:'number',value:b.planned,onChange:e=>update(d=>{d.bonuses.find(x=>x.id===b.id).planned=parseFloat(e.target.value)||0;return d;})})),
+          h('div',{className:'inv-field'},h('div',{className:'inv-field-lbl'},'Actual received (₹)'),h('input',{className:'inv-field-inp',type:'number',value:b.actual,placeholder:b.planned||'0',style:{borderColor:b.actual!==''?'var(--gb)':'var(--border)',color:b.actual!==''?'var(--green)':'var(--text)'},onChange:e=>update(d=>{d.bonuses.find(x=>x.id===b.id).actual=e.target.value;return d;})})),
+        )
+      )),
+      h('button',{className:'btn btn-a',onClick:()=>update(d=>{d.bonuses.push({id:d.nextBonId++,name:'New Bonus',planned:0,actual:''});return d;})},'+ Add bonus'),
+    ),
+  );
+}
+
+// ════════════════════════════
+// TRACKER PAGE (accessed from More)
+// ════════════════════════════
+function TrackerPage({data,update,sal,remit,totalExp,projSave,invMo,years,MONTHS}){
+  const today=new Date();
+  const bonusActual=data.bonuses.reduce((s,b)=>s+(b.actual!==''?parseFloat(b.actual)||0:0),0);
+  const months=Array.from({length:Math.min(MONTHS,24)},(_,m)=>{
+    const moDate=new Date(2026,5+m,1);
+    const moProjSave=Math.max(0,sal-remit-totalExp);
+    const actuals=data.monthActuals[m]||{};
+    const anyEntered=data.investments.some(inv=>actuals[inv.id]!==undefined&&actuals[inv.id]!=='');
+    const isPast=moDate<new Date(today.getFullYear(),today.getMonth(),1);
+    const isCurrent=moDate.getMonth()===today.getMonth()&&moDate.getFullYear()===today.getFullYear();
+    return{m,moDate,moProjSave,actuals,anyEntered,isPast,isCurrent};
+  });
+  let cum={};data.investments.forEach(i=>{cum[i.id]=0;});
+
+  return h('div',null,
+    h('div',{className:'sec-hdr'},h('div',{className:'sec-title'},'Monthly Tracker'),h('div',{className:'sec-sub'},'Edit actual savings each month')),
+    h('div',{className:'notice'},'Bonus: ',h('span',{style:{color:bonusActual?'var(--green)':'var(--dim)'}},bonusActual?fmt(bonusActual):'not entered yet')),
+    months.map(({m,moDate,moProjSave,actuals,anyEntered,isPast,isCurrent})=>{
+      data.investments.forEach(inv=>{const a=actuals[inv.id];cum[inv.id]=(cum[inv.id]||0)+(a!==undefined&&a!==''?parseFloat(a)||0:invMo(inv));});
+      const label=moDate.toLocaleDateString('en-IN',{month:'short',year:'2-digit'});
+      const statusEl=anyEntered?h('span',{className:'tracker-status st-ok'},'✓'):isPast||isCurrent?h('span',{className:'tracker-status st-pend'},'—'):h('span',{className:'tracker-status st-fut'},'proj.');
+      return h('div',{key:m,className:'tracker-row'},
+        h('div',null,h('div',{className:'tracker-mo'},label),h('div',{className:'tracker-proj'},fmt(moProjSave))),
+        h('div',{className:'tracker-inputs'},
+          data.investments.map(inv=>{const cur=actuals[inv.id];const filled=cur!==undefined&&cur!=='';return h('div',{key:inv.id,style:{display:'flex',flexDirection:'column',gap:'2px',alignItems:'center'}},h('div',{style:{fontSize:'9px',color:inv.color,fontFamily:"'JetBrains Mono',monospace",textAlign:'center'}},inv.name.split(' ')[0]),h('input',{className:'tracker-inp '+(filled?'filled':''),type:'number',value:filled?cur:'',placeholder:invMo(inv),onChange:e=>update(d=>{if(!d.monthActuals[m])d.monthActuals[m]={};d.monthActuals[m][inv.id]=e.target.value;return d;})}));}),
+        ),
+        statusEl,
+      );
+    })
+  );
+}
+
+// ════════════════════════════
+// MORE PAGE
+// ════════════════════════════
+function MorePage({data,update,S,sal,remit,years,logout,user}){
+  const[showTracker,setShowTracker]=useState(false);
+  const totalExp=data.expenses.reduce((s,e)=>s+e.amt,0);
+  const projSave=sal-remit-totalExp;
+  const totalFixed=data.investments.filter(i=>i.useFixed).reduce((s,i)=>s+i.fixedAmt,0);
+  const autoInvs=data.investments.filter(i=>!i.useFixed);
+  const remainAuto=Math.max(0,projSave-totalFixed);
+  function invMo(inv){if(inv.useFixed)return inv.fixedAmt;return autoInvs.length>0?Math.round(remainAuto/autoInvs.length):0;}
+  const MONTHS=years*12;
+
+  if(showTracker)return h('div',null,
+    h('button',{className:'btn',style:{marginBottom:'14px'},onClick:()=>setShowTracker(false)},'← Back'),
+    h(TrackerPage,{data,update,sal,remit,totalExp,projSave,invMo,years,MONTHS}),
+  );
+
+  return h('div',null,
+    h('div',{className:'sec-hdr'},h('div',{className:'sec-title'},'Settings & more')),
+
+    // Settings
+    h('div',{className:'settings-group'},
+      h('div',{className:'settings-row'},
+        h('div',null,h('div',{className:'settings-label'},'Monthly take-home'),h('div',{className:'settings-sub'},'post tax & deductions')),
+        h('input',{className:'settings-inp',type:'number',value:S.salary,onChange:e=>update(d=>{d.settings.salary=parseFloat(e.target.value)||0;return d;})}),
+      ),
+      h('div',{className:'settings-row'},
+        h('div',null,h('div',{className:'settings-label'},'Home remittance'),h('div',{className:'settings-sub'},'sent home monthly')),
+        h('input',{className:'settings-inp',type:'number',value:S.remittance,onChange:e=>update(d=>{d.settings.remittance=parseFloat(e.target.value)||0;return d;})}),
+      ),
+      h('div',{className:'settings-row'},
+        h('div',null,h('div',{className:'settings-label'},'Projection years'),h('div',{className:'settings-sub'},'for investment calculator')),
+        h('input',{className:'settings-inp',type:'number',value:S.projYears,onChange:e=>update(d=>{d.settings.projYears=parseFloat(e.target.value)||0;return d;})}),
+      ),
+    ),
+
+    // Expenses
+    h('div',{className:'card'},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},'Monthly expenses')),
+      data.expenses.map(e=>h('div',{key:e.id,className:'exp-item'},
+        h('div',{className:'exp-ico',style:{background:CAT_COL[e.cat]||'#64748b'}},CAT_ICO[e.cat]||'📦'),
+        h('div',{className:'exp-body'},
+          h('input',{className:'inline-inp exp-name',value:e.lbl,onChange:v=>update(d=>{d.expenses.find(x=>x.id===e.id).lbl=v.target.value;return d;})}),
+          h('select',{style:{background:'transparent',border:'none',color:'var(--muted)',fontSize:'11px',padding:0},value:e.cat,onChange:v=>update(d=>{d.expenses.find(x=>x.id===e.id).cat=v.target.value;return d;})},CATS.map(c=>h('option',{key:c},c))),
+        ),
+        h('input',{className:'inline-amt',type:'number',value:e.amt,onChange:v=>update(d=>{d.expenses.find(x=>x.id===e.id).amt=parseFloat(v.target.value)||0;return d;})}),
+        h('button',{className:'btn-d',onClick:()=>update(d=>{d.expenses=d.expenses.filter(x=>x.id!==e.id);return d;})},'×'),
+      )),
+      h('button',{className:'btn btn-g',style:{marginTop:'10px'},onClick:()=>update(d=>{d.expenses.push({id:d.nextExpId++,lbl:'New expense',cat:'Misc',amt:0});return d;})},'+ Add expense'),
+    ),
+
+    // Nav items
+    h('div',{className:'settings-group'},
+      h('div',{className:'settings-row',style:{cursor:'pointer'},onClick:()=>setShowTracker(true)},
+        h('div',null,h('div',{className:'settings-label'},'Monthly savings tracker'),h('div',{className:'settings-sub'},'Enter actuals month by month')),
+        h('div',{style:{color:'var(--muted)',fontSize:'18px'}},'›'),
+      ),
+    ),
+
+    // About + share
+    h('div',{className:'card'},
+      h('div',{className:'card-hdr'},h('div',{className:'card-ttl'},'About Vault')),
+      h('div',{style:{fontSize:'13px',color:'var(--muted)',lineHeight:'1.7',marginBottom:'14px'}},'Vault is a local-first personal finance tracker. All data is stored on this device — nothing is sent to any server. Share the HTML file with friends; they create their own profiles.'),
+      h('button',{className:'btn btn-full',style:{marginBottom:'10px'},onClick:()=>{if(navigator.share)navigator.share({title:'Vault Finance',text:'Personal budget & investment tracker',url:window.location.href}).catch(()=>{});else{navigator.clipboard.writeText(window.location.href);alert('Link copied to clipboard!');}}},
+        '📤 Share Vault with friends',
+      ),
+    ),
+
+    h('div',{style:{marginTop:'24px',textAlign:'center'}},
+      h('button',{className:'btn',style:{color:'var(--red)',borderColor:'var(--rb)'},onClick:logout},'Sign out'),
+    ),
+  );
+}
+
+// ── BOOT ──
+if('serviceWorker'in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  });
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+</script>
+</body>
+</html>
